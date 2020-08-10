@@ -19,8 +19,6 @@ import software.amazon.awscdk.services.elasticloadbalancingv2.HealthCheck;
 import software.amazon.awscdk.services.iam.Role;
 
 public class AwsCdkDemoStack extends Stack {
-    //TODO: parameterize accId
-    private static final String AWS_ACC_ID = "***";
 
     public AwsCdkDemoStack(final Construct scope, final String id) {
         this(scope, id, null);
@@ -37,9 +35,11 @@ public class AwsCdkDemoStack extends Stack {
         FargateTaskDefinition taskDef = new FargateTaskDefinition(this, "CdkDemoTaskDefinition",
                 FargateTaskDefinitionProps.builder()
                         .executionRole(Role.fromRoleArn(this, "CdkDemoRole",
-                                "arn:aws:iam::" + AWS_ACC_ID + ":role/ecsTaskExecutionRole"))
+                                "arn:aws:iam::" + this.getAccount() + ":role/ecsTaskExecutionRole"))
                         .build());
-        RepositoryImage image = EcrImage.fromRegistry(AWS_ACC_ID + ".dkr.ecr.us-east-2.amazonaws.com/cdk-demo");
+        RepositoryImage image = EcrImage.fromRegistry(
+                this.getAccount() + ".dkr.ecr." + this.getRegion()
+                        + ".amazonaws.com/aws-cdk-demo");
         ContainerDefinitionOptions containerOpts = ContainerDefinitionOptions.builder()
                 //.image(ContainerImage.fromEcrRepository(new Repository(this, "cdk-demo")))
                 .image(image)
